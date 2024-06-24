@@ -1,5 +1,5 @@
 app = 'quetzal'
-primary_region = 'wow'
+primary_region = 'waw'
 
 [build]
 
