@@ -1,6 +1,6 @@
 
 <!-- PROJECT SHIELDS -->
-[![Codacy Badge][codacy-shield]][codacy-url]
+[![Codacy Badge][codacy-shield-url]][codacy-url]
 [![Issues][issues-shield]][issues-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
@@ -248,6 +248,8 @@ If you decide to re-use this repo to build your own, go ahead. No need to credit
 **Don't re-republish this thing pretty much as is though**, it is lame, and shameless.
 Tweak the look and feel, make it your own. Make it so that I wouldn't come across your stuff and think that it is mine. So that nobody comes across your claims and somehow finds out it's a louzy copy of someone else lacking added value and personalisation.
 
+[codacy-url]: https://app.codacy.com/gh/Apply-Creatures/creature-quetzal
+[codacy-shield-url]: https://img.shields.io/codacy/grade/e7ddbfb00bc4471a85679234f3cd109f?style=for-the-badge
 [contributors-shield]: https://img.shields.io/github/contributors/apply-creatures/creature-quetzal.svg?style=for-the-badge
 [contributors-url]: https://github.com/apply-creatures/creature-quetzal/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/apply-creatures/creature-quetzal.svg?style=for-the-badge
