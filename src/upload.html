@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MP3 Upload</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css?family=Roboto:400,400i,700");
+
+      .upload {
+        --color-black-softest: #485461;
+        --color-black-soft: #363f48;
+        --color-black-hard: #2d353c;
+        --color-black-hardest: #21282e;
+        --color-green-light: #65cca9;
+        --color-green: #29b586;
+        --ease-in-out-quartic: cubic-bezier(0.645, 0.045, 0.355, 1);
+        position: relative;
+        display: inline-flex;
+        background: #485461;
+        border-radius: 10px;
+        box-shadow: 0 1.7px 1.4px rgba(0, 0, 0, 0.02),
+          0 4px 3.3px rgba(0, 0, 0, 0.028), 0 7.5px 6.3px rgba(0, 0, 0, 0.035),
+          0 13.4px 11.2px rgba(0, 0, 0, 0.042),
+          0 25.1px 20.9px rgba(0, 0, 0, 0.05), 0 60px 50px rgba(0, 0, 0, 0.07);
+        overflow: hidden;
+        transform: rotate(0);
+      }
+      .upload-info {
+        display: flex;
+        align-items: center;
+        padding: 16px;
+        margin-right: 40px;
+        fill: #ddd;
+        color: #ddd;
+      }
+
+      .upload-filename {
+        padding-left: 8px;
+        transition: opacity 300ms ease;
+      }
+      .upload-filename.inactive {
+        opacity: 0.6;
+      }
+      .upload-button {
+        position: relative;
+        margin: 0;
+        font-size: 100%;
+        padding: 0.625rem 1rem;
+        font-family: inherit;
+        background: none;
+        border: none;
+        border-radius: inherit;
+        outline: none;
+        height: 100%;
+        border-radius: 0.225em;
+        font-weight: 100;
+        font-family: monospace;
+        cursor: pointer;
+      }
+
+      .upload-button-text {
+        padding: 8px 16px;
+        color: white;
+        background-color: var(--color-green);
+        border-radius: inherit;
+        outline: none;
+        cursor: pointer;
+        transition: background-color 200ms ease, box-shadow 300ms ease;
+      }
+      .upload-button-text:hover,
+      .upload-button-text:focus {
+        background-color: var(--color-green-light);
+      }
+      .upload-button-text.inactive {
+        background-color: rgba(255, 255, 255, 0.38);
+        cursor: not-allowed;
+      }
+      .upload-hint {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        color: white;
+        transform: translateY(100%);
+      }
+      .upload-progress {
+        position: absolute;
+        top: 90%;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        color: white;
+        background: linear-gradient(
+          270deg,
+          #87e0c2 0%,
+          #65cca9 50%,
+          #26b082 100%
+        );
+        transform-origin: left;
+      }
+      .upload.uploading .upload-button-text {
+        animation: fade-up-out 0.4s 0.4s forwards, button-pulse 500ms forwards;
+      }
+      .upload.uploading .upload-info > * {
+        animation: fade-up-out 0.4s 0.4s forwards;
+      }
+      .upload.uploading .upload-hint {
+        animation: fade-up-in 0.4s 0.8s forwards;
+      }
+      .upload.uploading .upload-progress {
+        animation: load-right 2s 1s var(--ease-in-out-quartic) forwards;
+        animation-iteration-count: infinite;
+      }
+
+      @keyframes button-pulse {
+        from {
+          box-shadow: 0 0 0 0 var(--color-green-light);
+        }
+        to {
+          box-shadow: 0 0 0 8px rgba(255, 255, 255, 0);
+        }
+      }
+      @keyframes fade-up-out {
+        to {
+          opacity: 0;
+          transform: translateY(-40%);
+        }
+      }
+      @keyframes fade-up-in {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes load-right {
+        0% {
+          left: -100%;
+        }
+        50% {
+          left: 0;
+        }
+        100% {
+          left: 100%;
+        }
+      }
+      [type="file"] {
+        height: 0;
+        overflow: hidden;
+        width: 0;
+        cursor: pointer;
+      }
+
+      .drop-area {
+        border: 1px solid var(--color-black-softest);
+        user-select: none;
+      }
+      .drop-area.droppable {
+        border: 1px dashed rgba(255, 255, 255, 0.6);
+      }
+      .drop-area.highlight {
+        border: 1px dashed var(--color-green);
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-family: monospace;
+        background: linear-gradient(#323635,#243b55);
+        color: #ccc;
+      }
+
+      .wrapper {
+        text-align: center;
+      }
+      .wrapper .upload-wrapper {
+        display: inline-block;
+        margin: 2rem auto 0;
+      }
+
+      h1,
+      h2 {
+        color: #ddd;
+        text-align: center;
+        letter-spacing: 0.02em;
+        margin-bottom: 0.3em;
+        font-family: Roboto, sans-serif;
+      }
+
+      .padding {
+        padding: 1rem;
+      }
+
+      hr {
+        height: 0.5px;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <div class="wrapper">
+      <h1>Denoiser</h1>
+      <br/><br/>
+      <p>Record some voice, the finished recording gets denoised</p>
+
+      <div class="wrapper">
+        <div class="upload-wrapper">
+          <div class="upload drop-area">
+            <button class="upload-button" id="startRecordingButton">Start Recording</button>
+            <button class="upload-button" id="stopRecordingButton" disabled>Stop Recording</button>
+          </div>
+        </div>
+      </div>
+      <p class="padding"></p>
+      <hr/>
+      <br/>
+
+      <p class="padding">Or, upload some mp3 file having background noise and get it back denoised</p>
+
+      <div class="upload-wrapper">
+        <div class="upload drop-area">
+          <div class="upload-info">
+            <svg
+              t="1581822650945"
+              class="clip"
+              viewBox="0 0 1024 1024"
+              version="1.1"
+              xmlns="http://www.w3.org/2000/svg"
+              p-id="3250"
+              width="20"
+              height="20"
+            >
+              <path
+                d="M645.51621918 141.21142578c21.36236596 0 41.79528808 4.04901123 61.4025879 12.06298852a159.71594214 159.71594214 0 0 1 54.26367236 35.87255836c15.84503198 16.07739258 27.76959252 34.13726783 35.78356909 54.13513184 7.86071778 19.30572486 11.76635766 39.80291724 11.76635767 61.53607177 0 21.68371583-3.90563989 42.22045875-11.76635767 61.54101586-8.01397729 19.99291992-19.95831275 38.02807617-35.78356909 54.08569313l-301.39672877 302.0839231c-9.21038818 9.22027564-20.15112281 16.48278832-32.74310277 21.77270508-12.29040503 4.81036401-24.54125953 7.19329834-36.82177783 7.19329834-12.29040503 0-24.56103516-2.38293433-36.85638427-7.19329834-12.63647461-5.28991675-23.53271461-12.55737281-32.7381587-21.77270508-9.55151367-9.58117675-16.69042992-20.44775367-21.50573731-32.57995583-4.7856443-11.61804223-7.15869117-23.91339135-7.15869188-36.9255979 0-13.14074708 2.37304688-25.55474854 7.16363524-37.19256639 4.81036401-11.94927954 11.94927954-22.78619408 21.50079395-32.55029274l278.11614966-278.46221923c6.45172119-6.51104737 14.22344971-9.75421118 23.27563501-9.75421119 8.8692627 0 16.54705787 3.24316383 23.03338622 9.75421119 6.47644019 6.49127173 9.73937964 14.18389916 9.73937964 23.08282495 0 9.0521853-3.26293945 16.81896972-9.73937964 23.32012891L366.97489888 629.73773218c-6.32812477 6.2935183-9.48724342 14.08007836-9.48724415 23.30529736 0 9.06701684 3.15417457 16.75964356 9.48724414 23.08776904 6.80273414 6.50610328 14.55963111 9.75915528 23.26574683 9.75915527 8.67150855 0 16.43334961-3.253052 23.27563501-9.76409935l301.37695313-302.04931665c18.93988037-18.96459937 28.40734887-42.04742432 28.40734814-69.25836158 0-27.16149926-9.4674685-50.26409912-28.40734815-69.22869849-19.44415283-19.13269043-42.55664086-28.72375464-69.31274438-28.72375536-26.97363258 0-49.99218727 9.59106422-69.1001587 28.72375536L274.3370815 536.89227319a159.99774146 159.99774146 0 0 0-35.80828883 54.33288526c-8.0337522 19.65179443-12.04321289 40.2824707-12.04321289 61.79809618 0 21.20910645 4.00451661 41.81011963 12.04321289 61.79809547 8.17218018 20.34393287 20.10168481 38.36920166 35.80828883 54.08569312 16.225708 16.06256104 34.30535888 28.13049292 54.23400854 36.15930176 19.91381813 8.0337522 40.47033667 12.06793189 61.64978002 12.0679326 21.13989281 0 41.70135474-4.03417969 61.63000513-12.0679326 19.91876221-8.02386474 38.01818872-20.09674073 54.2241211-36.15435768l300.86773656-301.53515601c6.47644019-6.50115991 14.23828125-9.76904273 23.28057912-9.76904344 8.88903833 0 16.56188941 3.26293945 23.04821776 9.76904344 6.48632836 6.48632836 9.7245481 14.17895508 9.7245481 23.06799269 0 9.09667992-3.23822046 16.8535769-9.7245481 23.37451172L552.40379244 815.35449242c-22.00012231 22.01989722-47.32745362 38.88336158-75.986938 50.49151564C449.10209565 877.14270043 420.37834101 882.78857422 390.21592671 882.78857422c-30.01904297 0-58.74279761-5.64587378-86.20587183-16.94256616-28.6842041-11.60815406-54.00659203-28.47161842-76.00671362-50.49151564a226.19586182 226.19586182 0 0 1-50.13061524-75.90289354A226.86328125 226.86328125 0 0 1 160.9697104 653.04797364c0-30.08331323 5.62115479-58.88122559 16.90795899-86.38385035 11.40545654-28.37768578 28.11566138-53.75939917 50.13061523-76.15997313h0.24719287L530.14164643 189.20135474c15.69177247-15.731323 33.68737817-27.70037818 53.98681641-35.89727735C604.09666377 145.26043701 624.55430562 141.23120141 645.51127583 141.23120141V141.21142578z"
+                p-id="3251"
+              ></path>
+            </svg>
+            <span class="upload-filename inactive drop-text"
+              >No file selected</span
+            >
+          </div>
+
+          <div action="/upload" method="POST" enctype="multipart/form-data">
+            <input
+              type="file"
+              name="mp3File"
+              id="file"
+              accept=".mp3"
+              onchange="uploadFile();"
+            />
+
+            <button class="upload-button" type="submit">
+              <label for="file" class="upload-button-text">Choose file</label>
+            </button>
+          </div>
+
+          <div class="upload-hint">Uploading...</div>
+          <div class="upload-progress"></div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const body = document.querySelector("body");
+      const upload = document.querySelector(".upload");
+      const uploadButtonText = document.querySelector(".upload-button-text");
+      const uploadFilename = document.querySelector(".upload-filename");
+      const fileInput = document.getElementById("file");
+      let form = document.querySelector("form");
+
+      fileInput.onchange = () => uploadFile(fileInput.files[0]);
+
+      const uploadFile = (file) => {
+        if (file) {
+          uploadFilename.classList.remove("inactive");
+          uploadFilename.innerText = file.name;
+          uploadButtonText.innerText = "Upload";
+
+          uploadButtonText.addEventListener("click", () => {
+            event.preventDefault();
+            console.log("Form submission triggered");
+            upload.classList.add("uploading");
+
+            const formData = new FormData();
+            formData.append("mp3File", file);
+
+            fetch("/upload", {
+              method: "POST",
+              body: formData,
+            })
+              .then((response) => {
+                if (response.ok) {
+                  console.log("File uploaded successfully.");
+                  setTimeout(() => {
+                    upload.classList.remove("uploading");
+                  }, 1000);
+
+                  response.blob().then((blob) => {
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = downloadUrl;
+                    a.download = "denoised.mp3";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(downloadUrl);
+                    // Reset the input field
+                    fileInput.value = "";
+                    uploadFilename.classList.add("inactive");
+                    uploadFilename.innerText = "No file selected";
+                    uploadButtonText.innerText = "Choose file";
+                  });
+                } else {
+                  console.error("Error:", response.status);
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+              });
+          });
+        }
+      };
+
+      const startRecordingButton = document.getElementById('startRecordingButton');
+      const stopRecordingButton = document.getElementById('stopRecordingButton');
+  
+      let mediaRecorder;
+      let audioChunks = [];
+  
+      // Start recording audio when the Start Recording button is clicked
+      startRecordingButton.addEventListener('click', async () => {
+        startRecordingButton.disabled = true;
+        stopRecordingButton.disabled = false;
+        audioChunks = [];
+  
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+  
+          mediaRecorder.addEventListener('dataavailable', event => {
+            audioChunks.push(event.data);
+          });
+  
+          mediaRecorder.start();
+        } catch (error) {
+          console.error('Error accessing microphone:', error);
+        }
+      });
+  
+      // Stop recording audio when the Stop Recording button is clicked
+      stopRecordingButton.addEventListener('click', () => {
+        startRecordingButton.disabled = false;
+        stopRecordingButton.disabled = true;
+  
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+  
+          mediaRecorder.addEventListener('stop', () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+  
+            // Convert the recorded audio to MP3 format
+            convertAudioToMP3(audioBlob);
+          });
+        }
+      });
+  
+      // Function to convert recorded audio to MP3 format
+      async function convertAudioToMP3(audioBlob) {
+        const formData = new FormData();
+        formData.append('mp3File', audioBlob, 'recorded_audio.mp3');
+  
+        try {
+          const response = await fetch('/upload', {
+            method: 'POST',
+            body: formData
+          });
+  
+          if (response.ok) {
+            console.log('File uploaded successfully.');
+            setTimeout(() => {
+              upload.classList.remove("uploading");
+            }, 1000);
+
+            response.blob().then((blob) => {
+              const downloadUrl = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = downloadUrl;
+              a.download = "denoised.mp3";
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              window.URL.revokeObjectURL(downloadUrl);
+              // Reset the input field
+              fileInput.value = "";
+              uploadFilename.classList.add("inactive");
+              uploadFilename.innerText = "No file selected";
+              uploadButtonText.innerText = "Choose file";
+            });
+          } else {
+            console.error('Error:', response.status);
+            // Handle error
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          // Handle error
+        }
+      }
+
+      const dropArea = document.querySelector(".drop-area");
+
+      // Remove unnecessary bubbling for drag events
+      ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+      });
+
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      ["dragenter", "dragover"].forEach((eventName) => {
+        body.addEventListener(eventName, displayDropArea, false);
+      });
+      ["dragleave", "drop"].forEach((eventName) => {
+        body.addEventListener(eventName, hideDropArea, false);
+      });
+      ["dragenter", "dragover"].forEach((eventName) => {
+        dropArea.addEventListener(eventName, highlight, false);
+      });
+      ["dragleave", "drop"].forEach((eventName) => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+      });
+
+      function highlight(e) {
+        if (!dropArea.classList.contains("highlight"))
+          dropArea.classList.add("highlight");
+      }
+
+      function unhighlight(e) {
+        dropArea.classList.remove("highlight");
+      }
+
+      function displayDropArea() {
+        if (!dropArea.classList.contains("highlight"))
+          dropArea.classList.add("droppable");
+      }
+
+      function hideDropArea() {
+        dropArea.classList.remove("droppable");
+      }
+
+      dropArea.addEventListener("drop", handleDrop, false);
+
+      function handleDrop(e) {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+        let file = files[0];
+
+        uploadFile(file);
+      }
+    </script>
+  </body>
+</html>

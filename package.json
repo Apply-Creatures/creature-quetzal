@@ -1,0 +1,47 @@
+{
+  "name": "creature-quetzal",
+  "version": "0.0.3",
+  "description": "A denoiser",
+  "scripts": {
+    "help": "echo 'npm run build, then npm run start, or npm run dev'",
+    "dev": "npx tsc && node dist/index.js",
+    "build": "npx tsc && cp src/upload.html dist",
+    "start": "node dist/index.js",
+    "doc:openapi": "mkdir -p dist/api && cp -r node_modules/swagger-ui-dist/* dist/api && cp src/swagger-initializer.js dist/api/ && cp src/swagger.json dist/api/",
+    "doc:redoc": "npx @redocly/cli build-docs --output dist/api/redoc.html ./src/swagger.json",
+    "build:all": "npm run build && npm run doc:openapi && npm run doc:redoc"
+  },
+  "keywords": [
+    "Denoiser"
+  ],
+  "author": "hirako2000",
+  "license": "MIT",
+  "dependencies": {
+    "@types/multiparty": "0.0.36",
+    "fastify": "4.27.0",
+    "fastify-multipart": "5.4.0",
+    "formidable": "3.5.1",
+    "fs-extra": "11.2.0"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.13.4",
+    "@redocly/cli": "^1.14.0",
+    "@types/formidable": "3.4.5",
+    "@types/fs-extra": "11.0.4",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.6",
+    "@typespec/compiler": "^0.56.0",
+    "http-server": "^14.1.1",
+    "openapi-typescript": "^7.0.0-rc.0",
+    "openapi-typescript-codegen": "^0.29.0",
+    "redoc-cli": "^0.13.21",
+    "swagger-cli": "^4.0.4",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-dist": "^5.17.14",
+    "swagger-ui-express": "^5.0.1",
+    "ts-node": "^10.9.2",
+    "typed-openapi": "^0.5.0",
+    "typescript": "^5.4.5",
+    "typescript-openapi-generator": "^1.0.1"
+  }
+}
