@@ -1,0 +1,56 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "File Upload API",
+      "version": "1.0.0",
+      "description": "API for uploading and downloading files"
+    },
+    "servers": [
+      {
+        "url": "https://aeolus.fly.io"
+      }
+    ],
+    "paths": {
+      "/upload": {
+        "post": {
+          "summary": "Upload a a file via a POST request, a form multipart ",
+          "operationId": "uploadFile",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "File download stream",
+              "content": {
+                "application/octet-stream": {
+                  "schema": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Payload Too Large"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          }
+        }
+      }
+    }
+  }

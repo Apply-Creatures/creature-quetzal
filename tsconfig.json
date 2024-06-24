@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+      "outDir": "dist",
+      "sourceMap": true,
+      "noImplicitAny": true,
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "module": "NodeNext", // or "NodeNext"
+
+    }
+  }
