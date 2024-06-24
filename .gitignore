@@ -1,0 +1,13 @@
+# Project dependencies
+.cache
+node_modules
+yarn-error.log
+
+# Build directory
+dist
+
+# Editor
+.vscode/
+
+# OS
+.DS_Store
